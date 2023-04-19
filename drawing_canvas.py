@@ -10,7 +10,7 @@ def init_grid(rows, cols, color):
         grid.append([])
         for _ in range(cols):
             grid[i].append(color)
-    
+          
     return grid
     # [ 28 rows, 28 columns, tuple with rgb values
     #  [(255,255,255),(255,255,255)],
@@ -68,9 +68,8 @@ def sdg_predict(array):
     #time.sleep(1)
     return(sgd_clf.predict([array]))
     
-def knn(array):
-    #TODO train knn algorithm
-    pass
+def forest_predict(array):
+    return(forest_clf.predict([array]))
 
 def predict_value():
     result = sdg_predict(convert_canvas_to_array(grid))[0]
@@ -88,8 +87,12 @@ clock = pygame.time.Clock()
 grid = init_grid(ROWS, COLS, BG_COLOR)
 drawing_color = BLACK
 value = ""
-with open('model.pkl', 'rb') as f:
+#Loads ML Models from different file
+with open('sgd_model.pkl', 'rb') as f:
     sgd_clf = pickle.load(f)
+
+with open('forest_model.pkl', 'rb') as f:
+    forest_clf = pickle.load(f)
 
 button_y = HEIGHT - TOOLBAR_HEIGHT/2 - 25
 buttons = [
@@ -97,8 +100,8 @@ buttons = [
     Button(70, button_y, 50, 50, WHITE, "Erase", BLACK),
     Button(130, button_y, 50, 50, WHITE, "Clear", BLACK),
     Button(190, button_y, 50, 50, WHITE, "SGD", BLACK),
-    Button(250, button_y, 50, 50, WHITE, "KNN", BLACK),
-    Button(310, button_y, 150, 50, WHITE, f"Predict Value {value}" , BLACK),
+    Button(250, button_y, 90, 50, WHITE, "FOREST", BLACK),
+    Button(350, button_y, 150, 50, WHITE, f"Predict Value {value}" , BLACK),
 ]
 
 while run:
@@ -116,6 +119,10 @@ while run:
         try:
             row, col = get_row_col_from_pos(pos)
             grid[col][row] = drawing_color
+            #grid[col][row + 1] = drawing_color
+            grid[col][row -1] = drawing_color
+            grid[col + 1][row] = drawing_color
+            #grid[col - 1][row] = drawing_color
         except IndexError:
             for button in buttons:
                 if not button.clicked(pos):
@@ -125,32 +132,39 @@ while run:
                 if button.text == "Clear":
                     grid = init_grid(ROWS, COLS, BG_COLOR) 
                     result = ""
-                    buttons[5] = Button(310, button_y, 150, 50, WHITE, f"Predict Value {result}" , BLACK)
+                    buttons[5] = Button(350, button_y, 150, 50, WHITE, f"Predict Value {result}" , BLACK)
                     drawing_color = BLACK 
                 elif button.text == "SGD": 
-                    # result = sdg_predict(convert_canvas_to_array(grid))[0]
-                    # print("result:", result)
-                    # buttons[5] = Button(310, button_y, 150, 50, WHITE, f"Value: {result}" , BLACK)
-                    # print("value", value)
+                    SGD = True
+                    FOREST = False
                     drawing_color = BLACK
-                    print("pressed down")
 
-                elif button.text == "KNN":
-                    #TODO
+                elif button.text == "FOREST":
+                    FOREST = True
+                    SGD = False
                     drawing_color = BLACK 
                 
                 elif button.text == f"Predict Value {value}":
-                    result = sdg_predict(convert_canvas_to_array(grid))[0]
-                    buttons[5] = Button(310, button_y, 150, 50, WHITE, f"Value: {result}" , BLACK)
+                    array = convert_canvas_to_array(grid)
+                    if SGD:
+                        result = sdg_predict(array)[0]
+                    elif FOREST:
+                        result = forest_predict(array)[0]
+
+                    buttons[5] = Button(350, button_y, 150, 50, WHITE, f"Value: {result}" , BLACK)
                     drawing_color = BLACK
+                    print("drawing color", drawing_color)
                 
-                elif button.text == f"Value: {value}":
-                    result = sdg_predict(convert_canvas_to_array(grid))[0]
-                    buttons[5] = Button(310, button_y, 150, 50, WHITE, f"Value: {result}" , BLACK)
+                elif button.text == f"Value: {result}":
+                    array = convert_canvas_to_array(grid)
+                    if SGD:
+                        result = sdg_predict(array)[0]
+                    elif FOREST:
+                        result = forest_predict(array)[0]
+
+                    buttons[5] = Button(350, button_y, 150, 50, WHITE, f"Value: {result}" , BLACK)
                     drawing_color = BLACK
                
-                 
-
     draw(WIN, grid)
 
 pygame.quit()

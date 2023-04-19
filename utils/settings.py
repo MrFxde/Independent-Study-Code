@@ -13,7 +13,7 @@ pygame.init()
 pygame.font.init()
 
 WHITE = (255,255,255)
-BLACK = (0,0,0)
+BLACK = (20,20,20)
 RED = (255,0,0)
 BLUE = (0,255,0)
 GREEN = (0,0,255)
@@ -34,6 +34,8 @@ BG_COLOR = WHITE
 DRAW_GRID_LINES = True
 
 button_pressed = False
+
+SGD = True
 
 def get_font(size):
     return pygame.font.SysFont("comicsans", size)
