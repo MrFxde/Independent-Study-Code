@@ -3,6 +3,7 @@
 #dot? it is a relevant import, 
 from .settings import *
 import pygame
+from .button import Button
 #TIPS AND TRICKS
 #SHIFT + OPTION + DOWN 
 #to copy current line down
